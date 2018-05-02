@@ -41,6 +41,7 @@ fsnEvent basePath timestamp (INo.Closed   False (Just name) _) = Just (Modified 
 fsnEvent basePath timestamp (INo.MovedOut False       name  _) = Just (Removed  (basePath </> name) timestamp)
 fsnEvent basePath timestamp (INo.MovedIn  False       name  _) = Just (Added    (basePath </> name) timestamp)
 fsnEvent basePath timestamp (INo.Deleted  False       name   ) = Just (Removed  (basePath </> name) timestamp)
+fsnEvent basePath timestamp (INo.Modified False (Just name)  ) = Just (Modified (basePath </> name) timestamp)
 fsnEvent _        _         _                                  = Nothing
 
 handleInoEvent :: ActionPredicate -> EventChannel -> FilePath -> DebouncePayload -> INo.Event -> IO ()
@@ -65,7 +66,7 @@ handleEvent actPred chan dbp (Just event) =
 handleEvent _ _ _ Nothing = return ()
 
 varieties :: [INo.EventVariety]
-varieties = [INo.Create, INo.Delete, INo.MoveIn, INo.MoveOut, INo.CloseWrite]
+varieties = [INo.Create, INo.Delete, INo.MoveIn, INo.MoveOut, INo.CloseWrite, INo.Modify]
 
 instance FileListener INo.INotify where
   initSession = E.catch (fmap Just INo.initINotify) (\(_ :: IOException) -> return Nothing)
