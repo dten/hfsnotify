@@ -65,6 +65,9 @@ fsnEvent basePath timestamp event = case event of
   INo.Deleted  False       raw    -> do
     name <- fromRawFilePath raw
     return $ Just (Removed  (basePath </> name) timestamp)
+  INo.Modified False (Just raw) -> do
+    name <- fromRawFilePath raw
+    return $ Just (Modified (basePath </> name) timestamp)
   _                               ->
     return Nothing
 
@@ -90,7 +93,7 @@ handleEvent actPred chan dbp (Just event) =
 handleEvent _ _ _ Nothing = return ()
 
 varieties :: [INo.EventVariety]
-varieties = [INo.Create, INo.Delete, INo.MoveIn, INo.MoveOut, INo.CloseWrite]
+varieties = [INo.Create, INo.Delete, INo.MoveIn, INo.MoveOut, INo.CloseWrite, INo.Modify]
 
 instance FileListener INo.INotify where
   initSession = E.catch (fmap Just INo.initINotify) (\(_ :: IOException) -> return Nothing)
